@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Symptom Checker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+        }
+        input, button {
+            margin: 5px 0;
+            padding: 10px;
+            width: 100%;
+        }
+        .symptom-list, .suggestion-box {
+            margin-top: 20px;
+            list-style-type: none;
+            padding: 0;
+        }
+        .symptom-item {
+            background-color: #f0f0f0;
+            padding: 10px;
+            margin: 5px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+        .suggestion-box {
+            background-color: #e0e0e0;
+            padding: 15px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Symptom Checker</h1>
+        <input type="text" id="symptomInput" placeholder="Ange ditt symptom" />
+        <button onclick="addSymptom()">Lägg till symptom</button>
+        <button onclick="clearAll()">Rensa alla symptom</button>
+        
+        <ul id="symptomList" class="symptom-list"></ul>
+
+        <div id="suggestionBox" class="suggestion-box" style="display:none;">
+            <h2>Möjliga diagnoser:</h2>
+            <p id="suggestions"></p>
+            <h3>Rekommendationer:</h3>
+            <p>Det är viktigt att kontakta vårdpersonal för en korrekt diagnos. Boka en tid hos din läkare om symptomen kvarstår eller förvärras.</p>
+        </div>
+    </div>
+
+    <script>
+        const symptomList = document.getElementById('symptomList');
+        const suggestionsDiv = document.getElementById('suggestionBox');
+        const suggestionsText = document.getElementById('suggestions');
+
+        const symptomData = {
+            "feber": ["Förkylning", "Influensa", "COVID-19"],
+            "hosta": ["Förkylning", "Bronkit", "Astma"],
+            "huvudvärk": ["Spänningshuvudvärk", "Migrän", "Sinusinfektion"],
+            "ont i halsen": ["Halsfluss", "Förkylning", "COVID-19"],
+            "trötthet": ["Anemi", "Depression", "Hypotyreos"]
+        };
+
+        function addSymptom() {
+            const symptomInput = document.getElementById('symptomInput').value.trim().toLowerCase();
+
+            if (symptomInput) {
+                const listItem = document.createElement('li');
+                listItem.className = 'symptom-item';
+                listItem.innerHTML = `
+                    ${symptomInput.charAt(0).toUpperCase() + symptomInput.slice(1)}
+                    <button onclick="removeSymptom(this)">Radera</button>
+                `;
+                symptomList.appendChild(listItem);
+                document.getElementById('symptomInput').value = '';
+
+                updateSuggestions();
+            } else {
+                alert('Ange ett symptom!');
+            }
+        }
+
+        function removeSymptom(button) {
+            const listItem = button.parentElement;
+            symptomList.removeChild(listItem);
+
+            updateSuggestions();
+        }
+
+        function clearAll() {
+            symptomList.innerHTML = '';
+            suggestionsDiv.style.display = 'none';
+        }
+
+        function updateSuggestions() {
+            const symptoms = Array.from(symptomList.getElementsByTagName('li')).map(li => li.textContent.replace('Radera', '').trim().toLowerCase());
+            
+            let possibleConditions = [];
+
+            symptoms.forEach(symptom => {
+                if (symptomData[symptom]) {
+                    possibleConditions = possibleConditions.concat(symptomData[symptom]);
+                }
+            });
+
+            if (possibleConditions.length > 0) {
+                const uniqueConditions = [...new Set(possibleConditions)];
+                suggestionsText.textContent = uniqueConditions.join(', ');
+                suggestionsDiv.style.display = 'block';
+            } else {
+                suggestionsDiv.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
